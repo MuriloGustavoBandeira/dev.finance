@@ -1,5 +1,5 @@
 const Modal = {
-    open() {
+    open(){
         document
             .querySelector('.modal-overlay')
             .classList
@@ -7,7 +7,8 @@ const Modal = {
 
     },
     close() {
-        document.querySelector('.modal-overlay')
+        document
+            .querySelector('.modal-overlay')
             .classList
             .remove('active')
     }
@@ -27,6 +28,7 @@ const Storage = {
 
 const Transaction = {
     all: Storage.get(),
+
     add(transaction) {
         Transaction.all.push(transaction)
 
@@ -41,11 +43,8 @@ const Transaction = {
 
     incomes() {
         let income = 0;
-        //pegar todas as transações 
-        transactions.all.forEach(transaction => {
-            //se ela transação é maior que zero
-            if (transaction.amount > 0) {
-                //somar a uma variavel e retornar a variavel
+        Transaction.all.forEach(transaction => {
+            if ( transaction.amount > 0 ) {
                 income += transaction.amount;
             }
         })
@@ -55,7 +54,7 @@ const Transaction = {
     expenses() {
         let expense = 0;
         //pegar todas as transações 
-        transactions.all.forEach(transaction => {
+        Transaction.all.forEach(transaction => {
             //se ela transação é menor que zero
             if (transaction.amount < 0) {
                 //somar a uma variavel e retornar a variavel
@@ -66,7 +65,7 @@ const Transaction = {
     },
 
     total() {
-        return Transaction.all.income() + Transaction.expenses();
+        return Transaction.incomes() + Transaction.expenses();
     }
 }
 
@@ -79,13 +78,12 @@ const DOM = {
         tr.innerHTML = DOM.innerHTMLTransaction(transaction, index)
         tr.dataset.index = index
 
-        DOM.transactionsContainer.appenChild(tr)
+        DOM.transactionsContainer.appendChild(tr)
 
     },
 
     innerHTMLTransaction(transaction, index) {
-        const CSSclass = transaction.amount > 0 ? "income" :
-            "expense"
+        const CSSclass = transaction.amount > 0 ? "income" : "expense"
 
         const amount = Utils.formatCurrency(transaction.amount)
 
@@ -102,13 +100,13 @@ const DOM = {
 
     updateBalance() {
         document
-            .getElementeById('incomeDisplay')
+            .getElementById('incomeDisplay')
             .innerHTML = Utils.formatCurrency(Transaction.incomes())
         document
-            .getElementeById('expenseDisplay')
+            .getElementById('expenseDisplay')
             .innerHTML = Utils.formatCurrency(Transaction.expenses())
         document
-            .getElementeById('totalDisplay')
+            .getElementById('totalDisplay')
             .innerHTML = Utils.formatCurrency(Transaction.total())
     },
 
@@ -119,8 +117,7 @@ const DOM = {
 
 const Utils = {
     formatAmount(value) {
-        value = Number(value) * 100
-        //value = Number(value.replace(/\,\./g, "")) * 100
+        value = Number(value.replace(/\,\./g, "")) * 100
 
         return value
     },
@@ -133,16 +130,16 @@ const Utils = {
     formatCurrency(value) {
         const signal = Number(value) < 0 ? "-" : ""
 
-        valeu = String(value).replace(/\D/g, "")
+        value = String(value).replace(/\D/g, "")
 
-        valeu = Number(valeu) / 100
+        value = Number(value) / 100
 
-        valeu = valeu.toLocaleString("pt-br", {
+        value = value.toLocaleString("pt-BR", {
             style: "currency",
             currency: "BRL"
         })
 
-        return signal + valeu
+        return signal + value
     }
 }
 
@@ -185,17 +182,17 @@ const Form = {
 
     clearFields() {
         Form.description.value = ""
-        Form.amount.valeu = ""
-        Form.date.valeu = ""
+        Form.amount.value = ""
+        Form.date.value = ""
     },
 
     submit(event) {
         event.preventDefault()
 
         try {
-            Form.formatValues()
+            Form.validateFields()
             const transaction = Form.formatValues()
-            Form.saveTransaction(transaction)
+            Transaction.add(transaction)
             Form.clearFields()
             Modal.close()
         } catch (error) {
@@ -206,7 +203,7 @@ const Form = {
 
 const App = {
     init() {
-        transactions.all.forEach(DOM.addTransaction)
+        Transaction.all.forEach(DOM.addTransaction)
         
         DOM.updateBalance()
 
